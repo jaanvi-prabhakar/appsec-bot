@@ -2,13 +2,9 @@
 
 > **AI-powered AppSec assistant for Jira – smart comments, remediation help, and ticket updates.**
 
----
-
 ## Overview
 
 The AppSec Bot Assistant is a GenAI-powered virtual Application Security engineer. It monitors Jira tickets for high-risk vulnerabilities, automatically comments on developer threads, provides remediation advice using OpenAI, and updates the ticket status, all in real-time or near real-time.
-
----
 
 ## Features
 
@@ -30,8 +26,6 @@ The AppSec Bot Assistant is a GenAI-powered virtual Application Security enginee
 - **Jira REST API** – ticket management
 - **JSON / SQLite** – lightweight logging
 - **Uvicorn** – FastAPI ASGI server
-
----
 
 ## Setup Instructions
 
