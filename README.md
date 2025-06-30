@@ -8,15 +8,13 @@ The AppSec Bot Assistant is a GenAI-powered virtual Application Security enginee
 
 ## Features
 
-- ✅ Connects to Jira Cloud via REST API
-- ✅ Auto-comments on high & critical vulnerability tickets
-- ✅ Detects developer messages like "Need help with remediation" and responds using OpenAI
-- ✅ Recognizes "This has been fixed" and moves ticket to `In Testing`
-- ✅ Logs all ticket interactions and status changes
-- ✅ (Stretch) Maintains a stateful chat log per ticket
-- ✅ (Stretch) Summarizes final resolution in a closing comment
-
----
+- Connects to Jira Cloud via REST API
+- Auto-comments on high & critical vulnerability tickets
+- Detects developer messages like "Need help with remediation" and responds using OpenAI
+- Recognizes "This has been fixed" and moves ticket to `In Testing`
+- Logs all ticket interactions and status changes
+- (Stretch) Maintains a stateful chat log per ticket
+- (Stretch) Summarizes final resolution in a closing comment
 
 ## Tech Stack
 
@@ -35,3 +33,18 @@ The AppSec Bot Assistant is a GenAI-powered virtual Application Security enginee
 git clone https://github.com/jaanvi-prabhakar/appsec-bot.git
 cd appsec-bot
 ```
+
+## File Structure
+
+├── main.py # FastAPI entry point
+├── jira_handler.py # Jira API logic
+├── llm_handler.py # OpenAI integration
+├── state_manager.py # Chat memory (stretch)
+├── templates/prompts.py # Prompt templates per vulnerability
+├── logs/ticket_logs.json # JSON or SQLite logs
+├── requirements.txt
+└── README.md
+
+## Link to Demo Video
+
+Coming soon
