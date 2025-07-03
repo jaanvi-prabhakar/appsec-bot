@@ -40,3 +40,48 @@ def fetch_high_risk_tickets():
     except requests.exceptions.RequestException as e:
         logging.error(f"Error fetching Jira tickets: {e}")
         return []
+    
+def get_comments(ticket_id:str):
+    """
+    Fetch existing comments on a given Jira ticket.
+
+    Args:
+        ticket_id(str): The Jira issue key (ex. "KAN-1")
+
+    Returns:
+        List of comment bodies
+    """
+
+    url=f"{JIRA_BASE_URL}/issue/{ticket_id}/comment"
+    
+    try:
+        response = requests.get(url, headers=HEADERS, auth=AUTH)
+        response.raise_for_status()
+        comments = response.json().get("comments", [])
+        return [comment["body"] for comment in comments]
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to get comments for ticket ID: {ticket_id} due to error: {e}")
+        return []
+
+    
+def post_comment(ticket_id: str, message:str):
+    """
+    Posts a comment to a specific Jira issue.
+
+    Args:
+        ticket_id(str): The Jira issue key (e.g., "KAN-1")
+        message(str): The comment text to post
+    """
+
+    url = f"{JIRA_BASE_URL}/issue/{ticket_id}/comment"
+    payload = {
+        "body" : message
+    }
+
+    try:
+        response = requests.post(url, headers=HEADERS, auth=AUTH, json=payload)
+        response.raise_for_status()
+        logging.info(f"Comment posted to ticket_id: {ticket_id}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to post comment to {ticket_id}: {e}")
+
