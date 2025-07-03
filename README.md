@@ -36,6 +36,7 @@ cd appsec-bot
 
 ## File Structure
 
+<pre>
 ├── main.py # FastAPI entry point
 ├── jira_handler.py # Jira API logic
 ├── llm_handler.py # OpenAI integration
@@ -44,6 +45,7 @@ cd appsec-bot
 ├── logs/ticket_logs.json # JSON or SQLite logs
 ├── requirements.txt
 └── README.md
+</pre>
 
 ## Link to Demo Video
 
