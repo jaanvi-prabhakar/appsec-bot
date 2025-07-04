@@ -26,6 +26,7 @@ TRIGGER_KEYWORDS = [
     "can you help",
     "how to fix", 
     "suggest fix", 
+    "suggest a fix",
     "how can i fix", 
     "help me fix",
     "fix this",
@@ -38,6 +39,10 @@ TRIGGER_KEYWORDS = [
     "need resolution",
     "recommend fix",
     "any suggestions",
+    "give resolution",
+    "give a resolution"
+    "recommed a resolution",
+    "suggest a resolution",
     ]
 
 KNOWN_VULNS = ["SQL Injection", "XSS", "Cross Site Scripting", "RCE", "Remote Code Execution", "Hardcoded Credentials", "Secrets", "CSRF", "Broken Auth", "IDOR"]
@@ -78,18 +83,24 @@ async def lifespan(app:FastAPI):
                 else:
                     logging.info(f"Skipping comment for ticket ID: {ticket_id}: already posted.")
 
+                already_posted_remediation = any (
+                    "Remediation suggestion:" in comment for comment in existing_comments
+                )
 
                 # check latest comments for remediation request
                 for comment in existing_comments:
                     if should_trigger_llm(comment) and "AppSec Bot" not in comment:
-                        logging.info(f"Detected remediation request for ticket: {ticket_id}")
-                        
-                        vuln_type = extract_vuln_type(summary)
-                        logging.info(f"Extracted vulnerability type: {vuln_type} from summary: {summary}")
+                        if not already_posted_remediation:
+                            logging.info(f"Detected remediation request for ticket: {ticket_id}")
+                            
+                            vuln_type = extract_vuln_type(summary)
+                            logging.info(f"Extracted vulnerability type: {vuln_type} from summary: {summary}")
 
-                        remediation = generate_remediation_response(vuln_type, summary)
-                        bot_reply = f"Remediation suggestion:\n\n{remediation}"
-                        post_comment(ticket_id, bot_reply)
+                            remediation = generate_remediation_response(vuln_type, summary)
+                            bot_reply = f"Remediation suggestion:\n\n{remediation}"
+                            post_comment(ticket_id, bot_reply)
+                        else:
+                            logging.info(f"Skipping remediation comment, already posted for ticket {ticket_id}")
 
             await asyncio.sleep(POLL_INTERVAL) # poll every 60s
 
