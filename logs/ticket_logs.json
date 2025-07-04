@@ -1,0 +1,44 @@
+[
+  {
+    "ticket_id": "KAN-3",
+    "comment_type": "initial",
+    "status_transition": null,
+    "timestamp": "2025-07-04T11:54:29.995067+00:00"
+  },
+  {
+    "ticket_id": "KAN-3",
+    "comment_type": "remediation",
+    "status_transition": null,
+    "timestamp": "2025-07-04T11:55:34.877167+00:00"
+  },
+  {
+    "ticket_id": "KAN-3",
+    "comment_type": "fixed",
+    "status_transition": "In Testing",
+    "timestamp": "2025-07-04T11:56:36.627949+00:00"
+  },
+  {
+    "ticket_id": "KAN-1",
+    "comment_type": "initial",
+    "status_transition": null,
+    "timestamp": "2025-07-04T12:24:35.601842+00:00"
+  },
+  {
+    "ticket_id": "KAN-2",
+    "comment_type": "initial",
+    "status_transition": null,
+    "timestamp": "2025-07-04T12:25:36.693941+00:00"
+  },
+  {
+    "ticket_id": "KAN-1",
+    "comment_type": "remediation",
+    "status_transition": null,
+    "timestamp": "2025-07-04T12:25:40.426954+00:00"
+  },
+  {
+    "ticket_id": "KAN-2",
+    "comment_type": "remediation",
+    "status_transition": null,
+    "timestamp": "2025-07-04T12:26:44.476239+00:00"
+  }
+]

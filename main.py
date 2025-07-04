@@ -1,12 +1,16 @@
 from contextlib import asynccontextmanager
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import asyncio
 import logging
 
+from fastapi.responses import HTMLResponse
+
 from jira_handler import fetch_high_risk_tickets, get_comments, post_comment, transition_ticket_to_testing
 from llm_handler import generate_remediation_response
+from log_handler import log_event, get_logs
 
 # load env variables
 load_dotenv()
@@ -41,10 +45,10 @@ TRIGGER_KEYWORDS = [
     "recommend fix",
     "any suggestions",
     "give resolution",
-    "give a resolution"
+    "give a resolution",
     "recommed a resolution",
     "suggest a resolution",
-    "please help"
+    "please help",
     ]
 
 FIXED_KEYWORDS = [
@@ -97,6 +101,7 @@ async def lifespan(app:FastAPI):
                 if not already_posted:
                     message = "Hi team, AppSec Bot is reviewing the comment and will get back shortly..."
                     post_comment(ticket_id, message)
+                    log_event(ticket_id, comment_type="initial")
                 else:
                     logging.info(f"Skipping comment for ticket ID: {ticket_id}: already posted.")
 
@@ -117,6 +122,7 @@ async def lifespan(app:FastAPI):
                             remediation = generate_remediation_response(vuln_type, summary)
                             bot_reply = f"Remediation suggestion:\n\n{remediation}"
                             post_comment(ticket_id, bot_reply)
+                            log_event(ticket_id, comment_type="remediation")
                         else:
                             logging.info(f"Skipping remediation comment, already posted for ticket {ticket_id}")
 
@@ -124,7 +130,8 @@ async def lifespan(app:FastAPI):
                     if is_marked_as_fixed(comment):
                         logging.info(f"Detected 'fixed' status for ticket {ticket_id}, transitioning to 'In Testing'...")
                         transition_ticket_to_testing(ticket_id)
-                        
+                        log_event(ticket_id, comment_type="fixed", status_transition="In Testing")
+
             await asyncio.sleep(POLL_INTERVAL) # poll every 60s
 
     asyncio.create_task(poll_tickets())
@@ -149,3 +156,92 @@ app.add_middleware(
 @app.get("/ping")
 async def ping():
     return {"message": "AppSec Bot is running"}
+
+@app.get("/logs", response_class=HTMLResponse)
+async def view_logs():
+    logs = get_logs()
+    
+    html = """
+    <html>
+    <head>
+        <title> AppSec Bot: Activity Log </title>
+        <style>
+            body { 
+                font-family: Arial, 
+                sans-serif; 
+                padding: 20px; 
+            }
+            h2 { 
+                color: #2c3e50; 
+                margin-bottom: 2rem;
+                margin-top: 2rem;
+                text-align: center
+            }
+            table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin-top: 20px; 
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                overflow: hidden;
+                border: 1px solid #ccc; 
+            }
+            td {
+                background-color: #fffff;
+            }
+            th, td { 
+                border: 1px solid #ccc; 
+                padding: 8px 12px; 
+                text-align: left; 
+            }
+            th { 
+                background-color: #f2f2f2; 
+            }
+            tr:nth-child(even) { 
+                background-color: #f9f9f9; 
+            }
+        </style>
+    </head>
+    <body>
+        <h2>AppSec Bot:Activity Log</h2>
+        <table>
+            <tr>
+                <th>Ticket</th>
+                <th>Comment Type</th>
+                <th>Status Transition</th>
+                <th> Timestamp (UTC)</th>
+            </tr>
+    """
+
+    badge_colors = {
+        "initial": "#e3f2ff",
+        "remediation": "#fff9db",
+        "fixed": "#e6fae6"
+    }
+
+    for log in logs:
+        formatted_time = datetime.fromisoformat(log['timestamp']).strftime("%Y-%m-%d %H:%M:%S")
+        comment_type = log['comment_type'].lower()
+        color = badge_colors.get(comment_type, "#e0e0e0")
+        label = log['comment_type'].capitalize()
+
+        html += f"""
+        <tr>
+            <td>{log['ticket_id']}</td>
+            <td>
+                <span style="background:{color};padding:2px 6px;border-radius:4px;">
+                    {label}
+                </span>
+            </td>
+            <td>{log.get('status_transition') or 'None'}</td>
+            <td>{formatted_time}</td>
+        </tr>
+        """
+
+    html += """
+        </table>
+    </body>
+    </html>
+    """
+
+    return HTMLResponse(content=html)
