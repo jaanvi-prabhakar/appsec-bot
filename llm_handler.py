@@ -1,18 +1,13 @@
-from http import client
-from openai import OpenAI
-import os
+import openai
 from dotenv import load_dotenv
 import logging
 
 # load env variables
 load_dotenv()
 
-# Using OpenAI API key
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 def generate_remediation_response(vuln_type: str, description: str) -> str:
     """
-    Generates a remidiation suggestion using OpenAI based on vulnerability type and description.
+    Generates a remediation suggestion using OpenAI based on vulnerability type and description.
 
     Args:
         vuln_type (str): Type of vulnerability (ex. SQLi, XSS, Secrets)
@@ -22,11 +17,25 @@ def generate_remediation_response(vuln_type: str, description: str) -> str:
         str: AI-generated remediation advice 
     """
 
-    system_prompt = f"You are an expert Application Security engineer. Help developers remediate {vuln_type} vulnerabilities."
-    user_prompt = f"Vulnerability type: {vuln_type}\n Issue description: {description}\n What is the recommended remediation?"
+    REMEDIATION_PROMPT_TEMPLATE = """
+    You are an expert Application Security engineer.
+    A Jira ticket reports a vulnerability of type {vuln_type}.
+    Write a concise and actionable remediation suggestion for developers. Use Jira-style markdown (such as italic, bold, bullet points, numbered steps, code blocks) for formatting if helpful.
+    
+    Ensure the guidance follows best practices, includes code level recommendations (if applicable) and any prevention tips.
+
+    Output only the remediation suggestion, no extra introductions or summaries.
+    """
+
+    system_prompt = REMEDIATION_PROMPT_TEMPLATE;
+    user_prompt = (
+        f"Vulnerability type: {vuln_type}\n"
+        f"Issue description: {description}\n" 
+        "Please provide the recommended remediation steps."
+    )
 
     try:
-        response = client.chat.completions.create (
+        response = openai.chat.completions.create (
             model="gpt-3.5-turbo",
             messages= [
                 {"role":"system", "content": system_prompt},
