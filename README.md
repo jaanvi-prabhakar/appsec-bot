@@ -58,8 +58,8 @@ cd appsec-bot
 
 ![Login API SQL Injection Remediation](outputs/login_sql_injection_remediation.png)
 ![XSS Vuln Remediation](outputs/xss_vuln_remediation.png)
-![No Critical Labels](output/debugging/no_trigger_label.png)
-![No Critical Labels](output/debugging/no_trigger_label_2.png)
+![No Critical Labels](outputs/debugging/no_trigger_label.png)
+![No Critical Labels](outputs/debugging/no_trigger_label_2.png)
 ![Hardcoded AWS Credentials Remediation](outputs/hardcoded_creds_remediation.png)
 ![Admin Reports SQL Injection Remediation](outputs/admin_reports_sql_injection_remediation.png)
 
