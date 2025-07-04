@@ -7,12 +7,49 @@ import asyncio
 import logging
 
 from jira_handler import fetch_high_risk_tickets, get_comments, post_comment
+from llm_handler import generate_remediation_response
 
 # load env variables
 load_dotenv()
 
 # set up logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+
+#Constants
+POLL_INTERVAL = 60
+
+# define words that trigger LLM
+TRIGGER_KEYWORDS = [
+    "remediation", 
+    "remediate this",
+    "need help", 
+    "can you help",
+    "how to fix", 
+    "suggest fix", 
+    "how can i fix", 
+    "help me fix",
+    "fix this",
+    "need fix",
+    "what's the fix",
+    "help me resolve",
+    "how can i resolve",
+    "how do i resolve",
+    "resolve this",
+    "need resolution",
+    "recommend fix",
+    "any suggestions",
+    ]
+
+KNOWN_VULNS = ["SQL Injection", "XSS", "Cross Site Scripting", "RCE", "Remote Code Execution", "Hardcoded Credentials", "Secrets", "CSRF", "Broken Auth", "IDOR"]
+
+def should_trigger_llm(comment:str) -> bool:
+    return any(kw in comment.lower() for kw in TRIGGER_KEYWORDS)
+
+def extract_vuln_type(summary:str):
+    for vuln in KNOWN_VULNS:
+        if vuln.lower() in summary.lower():
+            return vuln
+    return "Unknown"
 
 #Lifespan manager
 @asynccontextmanager
@@ -31,17 +68,30 @@ async def lifespan(app:FastAPI):
 
                 #check for existing comments
                 existing_comments = get_comments(ticket_id)
+
                 already_posted = any (
                     "AppSec Bot is reviewing the comment" in comment for comment in existing_comments
                 )
-
                 if not already_posted:
                     message = "Hi team, AppSec Bot is reviewing the comment and will get back shortly..."
                     post_comment(ticket_id, message)
                 else:
                     logging.info(f"Skipping comment for ticket ID: {ticket_id}: already posted.")
 
-            await asyncio.sleep(60) # poll every 60s
+
+                # check latest comments for remediation request
+                for comment in existing_comments:
+                    if should_trigger_llm(comment) and "AppSec Bot" not in comment:
+                        logging.info(f"Detected remediation request for ticket: {ticket_id}")
+                        
+                        vuln_type = extract_vuln_type(summary)
+                        logging.info(f"Extracted vulnerability type: {vuln_type} from summary: {summary}")
+
+                        remediation = generate_remediation_response(vuln_type, summary)
+                        bot_reply = f"Remediation suggestion:\n\n{remediation}"
+                        post_comment(ticket_id, bot_reply)
+
+            await asyncio.sleep(POLL_INTERVAL) # poll every 60s
 
     asyncio.create_task(poll_tickets())
 
