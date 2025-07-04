@@ -20,7 +20,8 @@ def generate_remediation_response(vuln_type: str, description: str) -> str:
     REMEDIATION_PROMPT_TEMPLATE = """
     You are an expert Application Security engineer.
     A Jira ticket reports a vulnerability of type {vuln_type}.
-    Write a concise and actionable remediation suggestion for developers. Use Jira-style markdown (such as italic, bold, bullet points, numbered steps, code blocks) for formatting if helpful.
+    Write a concise and actionable remediation suggestion for developers. 
+    Use Jira-style markdown (such as bullet points, numbered steps, code blocks) for formatting if helpful. Do not use bold or italics.
     
     Ensure the guidance follows best practices, includes code level recommendations (if applicable) and any prevention tips.
 
