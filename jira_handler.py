@@ -58,7 +58,17 @@ def get_comments(ticket_id:str):
         response = requests.get(url, headers=HEADERS, auth=AUTH)
         response.raise_for_status()
         comments = response.json().get("comments", [])
-        return [comment["body"] for comment in comments]
+
+        # extract plain text from ADF - atlassian document format body
+        extracted_comments = []
+        for comment in comments:
+            text = ""
+            for block in comment["body"].get("content", []):
+                for inline in block.get("content", []):
+                    text += inline.get("text", "")
+            extracted_comments.append(text)
+            logging.info(extracted_comments)
+        return extracted_comments
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to get comments for ticket ID: {ticket_id} due to error: {e}")
         return []
@@ -75,7 +85,21 @@ def post_comment(ticket_id: str, message:str):
 
     url = f"{JIRA_BASE_URL}/issue/{ticket_id}/comment"
     payload = {
-        "body" : message
+        "body" : {
+            "type": "doc",
+            "version": 1,
+            "content" : [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": message
+                        }
+                    ]
+                }
+            ]
+        }
     }
 
     try:
