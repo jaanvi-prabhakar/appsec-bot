@@ -47,6 +47,30 @@ cd appsec-bot
 └── README.md
 </pre>
 
+## Screenshots
+
+### Tickets Created + Initial Steps
+
+![Tickets Created](outputs/tickets_created.png)
+![JIRA Board](outputs/JIRA_board.png)
+
+### Remediation Outputs: for tickets marked with high or critical label
+
+![Login API SQL Injection Remediation](outputs/login_sql_injection_remediation.png)
+![XSS Vuln Remediation](outputs/xss_vuln_remediation.png)
+![No Critical Labels](output/debugging/no_trigger_label.png)
+![No Critical Labels](output/debugging/no_trigger_label_2.png)
+![Hardcoded AWS Credentials Remediation](outputs/hardcoded_creds_remediation.png)
+![Admin Reports SQL Injection Remediation](outputs/admin_reports_sql_injection_remediation.png)
+
+### Fixed → In Testing
+
+![Fixed to Testing](outputs/fixed_ticket_moved_to_testing.png)
+
+### Logs Dashboard
+
+![Logs](outputs/logging_web_dashboard.png)
+
 ## Link to Demo Video
 
 Coming soon
