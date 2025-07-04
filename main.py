@@ -1,12 +1,11 @@
 from contextlib import asynccontextmanager
-from email import message
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import asyncio
 import logging
 
-from jira_handler import fetch_high_risk_tickets, get_comments, post_comment
+from jira_handler import fetch_high_risk_tickets, get_comments, post_comment, transition_ticket_to_testing
 from llm_handler import generate_remediation_response
 
 # load env variables
@@ -48,6 +47,18 @@ TRIGGER_KEYWORDS = [
     "please help"
     ]
 
+FIXED_KEYWORDS = [
+    "fixed",
+    "resolved",
+    "issue resolved",
+    "this is fixed",
+    "fix applied",
+    "patch added",
+    "vulnerability closed",
+    "remediated",
+    "solved"
+]
+
 KNOWN_VULNS = ["SQL Injection", "XSS", "Cross Site Scripting", "RCE", "Remote Code Execution", "Hardcoded Credentials", "Secrets", "CSRF", "Broken Auth", "IDOR"]
 
 def should_trigger_llm(comment:str) -> bool:
@@ -58,6 +69,9 @@ def extract_vuln_type(summary:str):
         if vuln.lower() in summary.lower():
             return vuln
     return "Unknown"
+
+def is_marked_as_fixed(comment:str) -> bool:
+    return any(keyword in comment.lower() for keyword in FIXED_KEYWORDS)
 
 #Lifespan manager
 @asynccontextmanager
@@ -76,7 +90,7 @@ async def lifespan(app:FastAPI):
 
                 #check for existing comments
                 existing_comments = get_comments(ticket_id)
-
+                # Post comment saying comments are being reviewed for high priority tickets
                 already_posted = any (
                     "AppSec Bot is reviewing the comment" in comment for comment in existing_comments
                 )
@@ -86,6 +100,7 @@ async def lifespan(app:FastAPI):
                 else:
                     logging.info(f"Skipping comment for ticket ID: {ticket_id}: already posted.")
 
+                # Commenting a remediation suggestion, if not done already for the given ticket ID
                 already_posted_remediation = any (
                     "Remediation suggestion:" in comment for comment in existing_comments
                 )
@@ -105,6 +120,11 @@ async def lifespan(app:FastAPI):
                         else:
                             logging.info(f"Skipping remediation comment, already posted for ticket {ticket_id}")
 
+                    # check if developer has marked the issue as fixed
+                    if is_marked_as_fixed(comment):
+                        logging.info(f"Detected 'fixed' status for ticket {ticket_id}, transitioning to 'In Testing'...")
+                        transition_ticket_to_testing(ticket_id)
+                        
             await asyncio.sleep(POLL_INTERVAL) # poll every 60s
 
     asyncio.create_task(poll_tickets())

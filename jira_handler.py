@@ -1,3 +1,4 @@
+import json
 import requests
 import os
 from dotenv import load_dotenv
@@ -109,3 +110,36 @@ def post_comment(ticket_id: str, message:str):
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to post comment to {ticket_id}: {e}")
 
+def get_transitions(ticket_id: str):
+    url = f"{JIRA_BASE_URL}/issue/{ticket_id}/transitions"
+    try:
+        response = requests.get(url, headers=HEADERS, auth=AUTH)
+        response.raise_for_status()
+        transitions = response.json()
+        print(json.dumps(transitions, indent=2))
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to get transactions for {ticket_id}: {e}")
+
+def transition_ticket_to_testing(ticket_id: str) -> None:
+    """
+    Moves the Jira ticket to 'In Testing' status.
+
+    Args:
+
+    """
+    #Created a new state and column of "In Testing" on the JIRA Board
+
+    url = f"{JIRA_BASE_URL}/issue/{ticket_id}/transitions"
+    payload = {
+        "transition" : {
+            "id" : "2" # Got id of 'In Testing' from browser dev tools & test_transitions.py
+        }
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=HEADERS, auth=AUTH)
+        response.raise_for_status()
+        logging.info(f"Ticket {ticket_id} successfully moved to 'In Testing'")
+    
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to transition {ticket_id} to 'In Testing'")
