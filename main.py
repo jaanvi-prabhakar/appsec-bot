@@ -31,18 +31,21 @@ TRIGGER_KEYWORDS = [
     "help me fix",
     "fix this",
     "need fix",
+    "need a fix",
     "what's the fix",
     "help me resolve",
     "how can i resolve",
     "how do i resolve",
     "resolve this",
     "need resolution",
+    "need a resolution",
     "recommend fix",
     "any suggestions",
     "give resolution",
     "give a resolution"
     "recommed a resolution",
     "suggest a resolution",
+    "please help"
     ]
 
 KNOWN_VULNS = ["SQL Injection", "XSS", "Cross Site Scripting", "RCE", "Remote Code Execution", "Hardcoded Credentials", "Secrets", "CSRF", "Broken Auth", "IDOR"]
