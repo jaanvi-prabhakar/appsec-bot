@@ -1,5 +1,3 @@
-from urllib import response
-from httpx import head
 import requests
 import os
 from dotenv import load_dotenv
@@ -18,7 +16,9 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
-AUTH = (JIRA_EMAIL, JIRA_API_TOKEN)
+if not JIRA_EMAIL or not JIRA_API_TOKEN:
+    raise ValueError("JIRA_EMAIL and JIRA_API_TOKEN must be set in .env")
+AUTH: tuple[str, str] = (JIRA_EMAIL, JIRA_API_TOKEN)
 
 # JQL query to get open tickets with risk=High or Critical
 JQL_QUERY = 'statusCategory = "To Do" AND labels IN ("High", "Critical") ORDER BY created DESC'
