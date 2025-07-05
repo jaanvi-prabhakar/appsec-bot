@@ -116,6 +116,6 @@ This project is licensed under the MIT License.
 
 ![Logs](outputs/logging_web_dashboard.png)
 
-## Link to Demo Video
+## Demo Video
 
-Coming soon
+https://github.com/user-attachments/assets/4fec843c-8286-46c8-87a9-eb8ddd841dfa
