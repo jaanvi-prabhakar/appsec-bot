@@ -90,7 +90,8 @@ Feel free to open issues or pull requests to improve the bot. Bug fixes, new fea
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the **GNU Affero General Public License v3.0** (AGPL-3.0), ensuring that any modifications, even when used over a network (ex. SaaS), remain open and shared with the community.  
+[Read the full license here](https://www.gnu.org/licenses/agpl-3.0.html).
 
 ## Screenshots [OUTPUTS]
 
